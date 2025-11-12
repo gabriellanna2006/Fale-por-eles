@@ -1,21 +1,11 @@
-export const resources = [
-  {
-    name: 'Clínica Veterinária Dr. Pet',
-    type: 'Serviços Veterinários',
-    description: 'Oferece cuidados médicos completos, incluindo emergências, cirurgias e consultas de rotina para todos os tipos de animais de estimação.',
-    address: 'Rua Principal, 123, Centro, Raul Soares, MG',
-    phone: '(33) 99999-1234',
-    website: 'https://www.drpet.com.br',
-  },
-  {
-    name: 'Abrigo Amigo Fiel',
-    type: 'Abrigo de Animais',
-    description: 'Resgata, reabilita e encontra lares amorosos para cães e gatos abandonados e maltratados. Aceita voluntários e doações.',
-    address: 'Estrada Rural, km 5, Zona Rural, Raul Soares, MG',
-    phone: '(33) 98888-5678',
-    website: 'https://www.amigofiel.org.br',
-  },
-];
+export const resources: {
+  name: string;
+  type: string;
+  description: string;
+  address: string;
+  phone: string;
+  website?: string;
+}[] = [];
 
 export const educationalContent = [
   {
