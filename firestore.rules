@@ -1,0 +1,66 @@
+/**
+ * @fileoverview Firestore Security Rules for 'Fale Pelos Animais' application.
+ *
+ * Core Philosophy:
+ * This ruleset prioritizes data availability while maintaining basic security.
+ * Public read access is granted where appropriate, while write access is restricted to prevent unauthorized modifications.
+ *
+ * Data Structure:
+ * - /incident_reports/{incidentReportId}: Stores incident reports.
+ * - /animal_welfare_resources/{animalWelfareResourceId}: Stores animal welfare resources.
+ * - /educational_articles/{educationalArticleId}: Stores educational articles.
+ *
+ * Key Security Decisions:
+ * - Incident reports have open reads and writes are only permitted.
+ * - Animal welfare resources and educational articles are completely public (read-only).
+ *
+ * Denormalization for Authorization:
+ * - Incident reports denormalize reporter information (reporterName, reporterContact) directly into the document to avoid needing to `get()` user data during authorization.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Manages access to incident reports.
+     * @path /incident_reports/{incidentReportId}
+     * @allow (create) Signed-in user can create a report. The 'id' field must match the {incidentReportId}.
+     * @deny (update, delete) No one can update or delete a report.
+     * @principle Enforces data availability for reporting, while restricting modifications.
+     */
+    match /incident_reports/{incidentReportId} {
+      allow get, list: if true;
+      allow create: if isSignedIn() && request.resource.data.id == incidentReportId;
+      allow update, delete: if false;
+    }
+
+    /**
+     * @description Manages access to animal welfare resources.
+     * @path /animal_welfare_resources/{animalWelfareResourceId}
+     * @allow (get, list) Everyone can read the resources.
+     * @deny (create, update, delete) No one can create, update, or delete a resource.
+     * @principle Provides public access to resource information.
+     */
+    match /animal_welfare_resources/{animalWelfareResourceId} {
+      allow get, list: if true;
+      allow create, update, delete: if false;
+    }
+
+    /**
+     * @description Manages access to educational articles.
+     * @path /educational_articles/{educationalArticleId}
+     * @allow (get, list) Everyone can read the articles.
+     * @deny (create, update, delete) No one can create, update, or delete an article.
+     * @principle Provides public access to educational content.
+     */
+    match /educational_articles/{educationalArticleId} {
+      allow get, list: if true;
+      allow create, update, delete: if false;
+    }
+
+    // Helper function to determine if a user is signed in.
+    function isSignedIn() {
+      return request.auth != null;
+    }
+  }
+}
