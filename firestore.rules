@@ -11,11 +11,13 @@
  * - /educational_articles/{educationalArticleId}: Stores educational articles.
  *
  * Key Security Decisions:
- * - Incident reports have open reads and writes are only permitted.
+ * - Incident reports can be created by anyone (including anonymous users) to encourage reporting.
+ * - To prevent spam and abuse, reads, updates, and deletes on incident reports are disallowed for now.
+ *   This can be changed later to allow administrators to view reports.
  * - Animal welfare resources and educational articles are completely public (read-only).
  *
  * Denormalization for Authorization:
- * - Incident reports denormalize reporter information (reporterName, reporterContact) directly into the document to avoid needing to `get()` user data during authorization.
+ * - Incident reports denormalize reporter information (reporterName, reporterContact) directly into the document.
  */
 rules_version = '2';
 service cloud.firestore {
@@ -24,14 +26,13 @@ service cloud.firestore {
     /**
      * @description Manages access to incident reports.
      * @path /incident_reports/{incidentReportId}
-     * @allow (create) Signed-in user can create a report. The 'id' field must match the {incidentReportId}.
-     * @deny (update, delete) No one can update or delete a report.
-     * @principle Enforces data availability for reporting, while restricting modifications.
+     * @allow (create) Anyone can create a report to facilitate denunciation.
+     * @deny (get, list, update, delete) No one can read, update or delete a report for now.
+     * @principle Enforces data availability for reporting, while restricting modifications and access.
      */
     match /incident_reports/{incidentReportId} {
-      allow get, list: if true;
-      allow create: if isSignedIn() && request.resource.data.id == incidentReportId;
-      allow update, delete: if false;
+      allow create: if true;
+      allow get, list, update, delete: if false;
     }
 
     /**

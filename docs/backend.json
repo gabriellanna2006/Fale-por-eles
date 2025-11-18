@@ -6,10 +6,6 @@
       "type": "object",
       "description": "Represents a report of an animal abuse incident.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the incident report."
-        },
         "description": {
           "type": "string",
           "description": "Detailed description of the incident."
@@ -37,10 +33,21 @@
         "reporterContact": {
           "type": "string",
           "description": "Contact information of the person reporting the incident."
+        },
+        "aiAnalysis": {
+          "type": "object",
+          "description": "Analysis from the AI model.",
+          "properties": {
+            "abuseEstimate": {
+              "type": "string"
+            },
+            "resources": {
+              "type": "string"
+            }
+          }
         }
       },
       "required": [
-        "id",
         "description",
         "location",
         "reportDate"
@@ -135,7 +142,6 @@
   },
   "auth": {
     "providers": [
-      "password",
       "anonymous"
     ]
   },
@@ -146,7 +152,7 @@
         "definition": {
           "entityName": "IncidentReport",
           "schema": {
-            "$ref": "#/backend/entities/IncidentReport"
+            "$ref": "#/entities/IncidentReport"
           },
           "description": "Stores incident reports. Includes denormalized reporter information (reporterName, reporterContact) for authorization independence.",
           "params": [
@@ -162,7 +168,7 @@
         "definition": {
           "entityName": "AnimalWelfareResource",
           "schema": {
-            "$ref": "#/backend/entities/AnimalWelfareResource"
+            "$ref": "#/entities/AnimalWelfareResource"
           },
           "description": "Stores information about animal welfare resources (shelters, vets, etc.).",
           "params": [
@@ -178,7 +184,7 @@
         "definition": {
           "entityName": "EducationalArticle",
           "schema": {
-            "$ref": "#/backend/entities/EducationalArticle"
+            "$ref": "#/entities/EducationalArticle"
           },
           "description": "Stores educational articles related to animal welfare and responsible pet ownership.",
           "params": [

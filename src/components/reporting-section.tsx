@@ -13,13 +13,15 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { handleImageAnalysis } from '@/app/actions';
+import { handleImageAnalysisAndSaveReport } from '@/app/actions';
 import type { AnalyzeAnimalAbuseImageOutput } from '@/ai/flows/analyze-animal-abuse-image';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const reportSchema = z.object({
   description: z.string().min(10, { message: 'A descrição deve ter pelo menos 10 caracteres.' }),
   location: z.string().optional(),
+  reporterName: z.string().optional(),
+  reporterContact: z.string().optional(),
 });
 
 export default function ReportingSection() {
@@ -35,6 +37,8 @@ export default function ReportingSection() {
     defaultValues: {
       description: '',
       location: '',
+      reporterName: '',
+      reporterContact: '',
     },
   });
 
@@ -75,17 +79,21 @@ export default function ReportingSection() {
     reader.readAsDataURL(imageFile);
     reader.onloadend = async () => {
       const photoDataUri = reader.result as string;
-      const result = await handleImageAnalysis({
+      const result = await handleImageAnalysisAndSaveReport({
+        ...values,
         photoDataUri,
-        description: values.description,
       });
 
       if (result.success && result.data) {
         setAnalysisResult(result.data);
         toast({
           title: 'Análise Concluída',
-          description: 'A análise da sua denúncia foi processada com sucesso.',
+          description: 'A sua denúncia foi processada e salva com sucesso.',
         });
+        form.reset();
+        setImageFile(null);
+        setImagePreview(null);
+
       } else {
         toast({
           variant: 'destructive',
@@ -154,6 +162,34 @@ export default function ReportingSection() {
                       </FormItem>
                     )}
                   />
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="reporterName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Seu Nome (Opcional)</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Seu nome" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="reporterContact"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Seu Contato (Opcional)</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Email ou telefone" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                   <FormItem>
                     <FormLabel>Foto da Situação</FormLabel>
                     <FormControl>
@@ -188,7 +224,7 @@ export default function ReportingSection() {
 
                   <Button type="submit" className="w-full" disabled={isSubmitting}>
                     {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {isSubmitting ? 'Analisando...' : 'Analisar e Enviar Denúncia'}
+                    {isSubmitting ? 'Analisando e Salvando...' : 'Analisar e Enviar Denúncia'}
                   </Button>
                 </form>
               </Form>
@@ -198,7 +234,7 @@ export default function ReportingSection() {
           {isSubmitting && (
             <div className="flex justify-center items-center flex-col gap-4 text-center">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <p className="text-muted-foreground">Analisando imagem com inteligência artificial... Isso pode levar um momento.</p>
+              <p className="text-muted-foreground">Analisando e salvando a denúncia... Isso pode levar um momento.</p>
             </div>
           )}
 
