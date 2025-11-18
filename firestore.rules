@@ -12,8 +12,8 @@
  *
  * Key Security Decisions:
  * - Incident reports can be created by anyone (including anonymous users) to encourage reporting.
- * - To prevent spam and abuse, reads, updates, and deletes on incident reports are disallowed for now.
- *   This can be changed later to allow administrators to view reports.
+ * - Incident reports can be read by anyone to be displayed on the reports page.
+ * - To prevent spam and abuse, updates and deletes on incident reports are disallowed.
  * - Animal welfare resources and educational articles are completely public (read-only).
  *
  * Denormalization for Authorization:
@@ -26,13 +26,13 @@ service cloud.firestore {
     /**
      * @description Manages access to incident reports.
      * @path /incident_reports/{incidentReportId}
-     * @allow (create) Anyone can create a report to facilitate denunciation.
-     * @deny (get, list, update, delete) No one can read, update or delete a report for now.
-     * @principle Enforces data availability for reporting, while restricting modifications and access.
+     * @allow (create, get, list) Anyone can create and read reports.
+     * @deny (update, delete) No one can update or delete a report for now.
+     * @principle Enforces data availability for reporting and viewing, while restricting modifications.
      */
     match /incident_reports/{incidentReportId} {
-      allow create: if true;
-      allow get, list, update, delete: if false;
+      allow create, get, list: if true;
+      allow update, delete: if false;
     }
 
     /**

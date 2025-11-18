@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { ArrowRight, Menu, X } from 'lucide-react';
 
 import { Logo } from '@/components/logo';
@@ -8,10 +9,11 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 
 const navLinks = [
-  { href: '#report', label: 'Denunciar' },
-  { href: '#map', label: 'Mapa' },
-  { href: '#resources', label: 'Recursos' },
-  { href: '#education', label: 'Educação' },
+  { href: '/#report', label: 'Denunciar' },
+  { href: '/reports', label: 'Denúncias' },
+  { href: '/#map', label: 'Mapa' },
+  { href: '/#resources', label: 'Recursos' },
+  { href: '/#education', label: 'Educação' },
 ];
 
 export default function Header() {
@@ -23,16 +25,16 @@ export default function Header() {
         <Logo />
         <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
           {navLinks.map((link) => (
-            <a key={link.href} href={link.href} className="text-white/80 hover:text-white transition-colors">
+            <Link key={link.href} href={link.href} className="text-white/80 hover:text-white transition-colors">
               {link.label}
-            </a>
+            </Link>
           ))}
         </nav>
         <div className="hidden md:flex items-center gap-4">
           <Button asChild className="bg-accent hover:bg-accent/90 text-accent-foreground">
-            <a href="#report">
+            <Link href="/#report">
               Fazer Denúncia <ArrowRight className="ml-2 h-4 w-4" />
-            </a>
+            </Link>
           </Button>
         </div>
 
@@ -54,15 +56,15 @@ export default function Header() {
              </div>
             <nav className="flex flex-col space-y-4 text-lg">
               {navLinks.map((link) => (
-                <a key={link.href} href={link.href} onClick={() => setSheetOpen(false)} className="text-white/80 hover:text-white transition-colors">
+                <Link key={link.href} href={link.href} onClick={() => setSheetOpen(false)} className="text-white/80 hover:text-white transition-colors">
                   {link.label}
-                </a>
+                </Link>
               ))}
             </nav>
             <Button asChild size="lg" className="w-full mt-8 bg-accent hover:bg-accent/90 text-accent-foreground" onClick={() => setSheetOpen(false)}>
-              <a href="#report">
+              <Link href="/#report">
                 Fazer Denúncia <ArrowRight className="ml-2 h-4 w-4" />
-              </a>
+              </Link>
             </Button>
           </SheetContent>
         </Sheet>

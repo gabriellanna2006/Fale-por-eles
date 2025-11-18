@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { ArrowRight, BookHeart, Globe, GraduationCap, MapPin, Phone } from "lucide-react";
 
 import Header from "@/components/layout/header";
