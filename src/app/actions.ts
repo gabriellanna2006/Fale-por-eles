@@ -3,8 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { initializeFirebase } from "@/firebase/index";
-import { collection, serverTimestamp } from "firebase/firestore";
-import { addDocumentNonBlocking } from "@/firebase/non-blocking-updates";
+import { collection, serverTimestamp, addDoc } from "firebase/firestore";
 
 const ReportSchema = z.object({
   description: z.string(),
@@ -29,7 +28,8 @@ async function saveReportToFirestore(report: ReportInput) {
     mediaUrls: [report.photoDataUri],
   };
   
-  addDocumentNonBlocking(reportsCollection, reportData);
+  // Usando addDoc diretamente para garantir que a operação seja concluída.
+  await addDoc(reportsCollection, reportData);
 }
 
 export async function handleSaveReport(
@@ -44,7 +44,7 @@ export async function handleSaveReport(
   const reportData = parsedInput.data;
 
   try {
-    saveReportToFirestore(reportData); // This is now non-blocking
+    await saveReportToFirestore(reportData);
 
     revalidatePath("/reports");
     return { success: true };
