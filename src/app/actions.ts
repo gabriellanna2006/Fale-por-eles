@@ -11,7 +11,7 @@ const ReportSchema = z.object({
   location: z.string().optional(),
   reporterName: z.string().optional(),
   reporterContact: z.string().optional(),
-  photoDataUri: z.string(), // Mantemos para referência, mas não será analisado
+  photoDataUri: z.string(),
 });
 
 type ReportInput = z.infer<typeof ReportSchema>;
@@ -26,7 +26,7 @@ async function saveReportToFirestore(report: ReportInput) {
     reporterName: report.reporterName || 'Anônimo',
     reporterContact: report.reporterContact || '',
     reportDate: serverTimestamp(),
-    mediaUrls: [report.photoDataUri], // Salva a URI da imagem
+    mediaUrls: [report.photoDataUri],
   };
   
   addDocumentNonBlocking(reportsCollection, reportData);
@@ -44,7 +44,7 @@ export async function handleSaveReport(
   const reportData = parsedInput.data;
 
   try {
-    await saveReportToFirestore(reportData);
+    saveReportToFirestore(reportData); // This is now non-blocking
 
     revalidatePath("/reports");
     return { success: true };

@@ -76,27 +76,37 @@ export default function ReportingSection() {
     reader.readAsDataURL(imageFile);
     reader.onloadend = async () => {
       const photoDataUri = reader.result as string;
-      const result = await handleSaveReport({
-        ...values,
-        photoDataUri,
-      });
+      
+      try {
+        const result = await handleSaveReport({
+          ...values,
+          photoDataUri,
+        });
 
-      if (result.success) {
-        toast({
-          title: 'Denúncia Enviada',
-          description: 'A sua denúncia foi enviada e salva com sucesso.',
+        if (result.success) {
+          toast({
+            title: 'Denúncia Enviada',
+            description: 'A sua denúncia foi enviada e salva com sucesso.',
+          });
+          form.reset();
+          setImageFile(null);
+          setImagePreview(null);
+        } else {
+          toast({
+            variant: 'destructive',
+            title: 'Erro no Envio',
+            description: result.error || 'Ocorreu um erro desconhecido.',
+          });
+        }
+      } catch (error) {
+         toast({
+            variant: 'destructive',
+            title: 'Erro no Envio',
+            description: 'Ocorreu um erro inesperado ao salvar a denúncia.',
         });
-        form.reset();
-        setImageFile(null);
-        setImagePreview(null);
-      } else {
-        toast({
-          variant: 'destructive',
-          title: 'Erro no Envio',
-          description: result.error || 'Ocorreu um erro desconhecido.',
-        });
+      } finally {
+        setIsSubmitting(false);
       }
-      setIsSubmitting(false);
     };
     reader.onerror = () => {
       toast({
