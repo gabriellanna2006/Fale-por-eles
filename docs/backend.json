@@ -1,7 +1,6 @@
 {
   "entities": {
     "IncidentReport": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "IncidentReport",
       "type": "object",
       "description": "Represents a report of an animal abuse incident.",
@@ -54,15 +53,10 @@
       ]
     },
     "AnimalWelfareResource": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "AnimalWelfareResource",
       "type": "object",
       "description": "Represents an animal welfare resource, such as a shelter or vet.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the resource."
-        },
         "name": {
           "type": "string",
           "description": "Name of the animal welfare resource."
@@ -90,22 +84,16 @@
         }
       },
       "required": [
-        "id",
         "name",
         "address",
         "contact"
       ]
     },
     "EducationalArticle": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "EducationalArticle",
       "type": "object",
       "description": "Represents an educational article or resource.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the article."
-        },
         "title": {
           "type": "string",
           "description": "Title of the article."
@@ -132,7 +120,6 @@
         }
       },
       "required": [
-        "id",
         "title",
         "content",
         "publicationDate",
@@ -146,56 +133,23 @@
     ]
   },
   "firestore": {
-    "structure": [
-      {
-        "path": "/incident_reports/{incidentReportId}",
-        "definition": {
-          "entityName": "IncidentReport",
-          "schema": {
-            "$ref": "#/entities/IncidentReport"
-          },
-          "description": "Stores incident reports. Includes denormalized reporter information (reporterName, reporterContact) for authorization independence.",
-          "params": [
-            {
-              "name": "incidentReportId",
-              "description": "Unique identifier for the incident report."
-            }
-          ]
-        }
+    "/incident_reports/{incidentReportId}": {
+      "schema": {
+        "$ref": "#/entities/IncidentReport"
       },
-      {
-        "path": "/animal_welfare_resources/{animalWelfareResourceId}",
-        "definition": {
-          "entityName": "AnimalWelfareResource",
-          "schema": {
-            "$ref": "#/entities/AnimalWelfareResource"
-          },
-          "description": "Stores information about animal welfare resources (shelters, vets, etc.).",
-          "params": [
-            {
-              "name": "animalWelfareResourceId",
-              "description": "Unique identifier for the animal welfare resource."
-            }
-          ]
-        }
+      "description": "Stores incident reports. Includes denormalized reporter information (reporterName, reporterContact) for authorization independence."
+    },
+    "/animal_welfare_resources/{animalWelfareResourceId}": {
+      "schema": {
+        "$ref": "#/entities/AnimalWelfareResource"
       },
-      {
-        "path": "/educational_articles/{educationalArticleId}",
-        "definition": {
-          "entityName": "EducationalArticle",
-          "schema": {
-            "$ref": "#/entities/EducationalArticle"
-          },
-          "description": "Stores educational articles related to animal welfare and responsible pet ownership.",
-          "params": [
-            {
-              "name": "educationalArticleId",
-              "description": "Unique identifier for the educational article."
-            }
-          ]
-        }
-      }
-    ],
-    "reasoning": "The Firestore structure is designed to support the 'Fale Pelos Animais' application, focusing on reporting animal abuse incidents, providing animal welfare resources, and offering educational content. Authorization Independence is achieved by avoiding `get()` calls in security rules. Data segregation ensures each collection has a clear security posture.\n\n*   `/incident_reports`: Stores incident reports with denormalized reporter information (reporterName, reporterContact) to allow for listing reports without needing to access user data. This collection supports QAPs as it does not rely on filtering.\n*   `/animal_welfare_resources`: Stores information about animal welfare resources. This collection is publicly readable, supporting QAPs as no user-specific filtering is required.\n*   `/educational_articles`: Stores educational articles. Similar to resources, these are publicly accessible, also supporting QAPs.\n"
+      "description": "Stores information about animal welfare resources (shelters, vets, etc.)."
+    },
+    "/educational_articles/{educationalArticleId}": {
+      "schema": {
+        "$ref": "#/entities/EducationalArticle"
+      },
+      "description": "Stores educational articles related to animal welfare and responsible pet ownership."
+    }
   }
 }
