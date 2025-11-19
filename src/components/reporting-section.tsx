@@ -13,8 +13,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { handleImageAnalysisAndSaveReport } from '@/app/actions';
-import type { AnalyzeAnimalAbuseImageOutput } from '@/ai/flows/analyze-animal-abuse-image';
+import { handleSaveReport } from '@/app/actions';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const reportSchema = z.object({
@@ -29,7 +28,6 @@ export default function ReportingSection() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [analysisResult, setAnalysisResult] = useState<AnalyzeAnimalAbuseImageOutput | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<z.infer<typeof reportSchema>>({
@@ -73,31 +71,28 @@ export default function ReportingSection() {
     }
 
     setIsSubmitting(true);
-    setAnalysisResult(null);
 
     const reader = new FileReader();
     reader.readAsDataURL(imageFile);
     reader.onloadend = async () => {
       const photoDataUri = reader.result as string;
-      const result = await handleImageAnalysisAndSaveReport({
+      const result = await handleSaveReport({
         ...values,
         photoDataUri,
       });
 
-      if (result.success && result.data) {
-        setAnalysisResult(result.data);
+      if (result.success) {
         toast({
-          title: 'Análise Concluída',
-          description: 'A sua denúncia foi processada e salva com sucesso.',
+          title: 'Denúncia Enviada',
+          description: 'A sua denúncia foi enviada e salva com sucesso.',
         });
         form.reset();
         setImageFile(null);
         setImagePreview(null);
-
       } else {
         toast({
           variant: 'destructive',
-          title: 'Erro na Análise',
+          title: 'Erro no Envio',
           description: result.error || 'Ocorreu um erro desconhecido.',
         });
       }
@@ -120,13 +115,13 @@ export default function ReportingSection() {
           <div className="text-center space-y-2">
             <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl font-headline">Denuncie Maus-Tratos</h2>
             <p className="text-muted-foreground md:text-xl">
-              Use o formulário abaixo para enviar sua denúncia. Nossa ferramenta de IA analisará a imagem e fornecerá recursos.
+              Use o formulário abaixo para enviar sua denúncia. Ela será registrada em nosso sistema.
             </p>
           </div>
 
           <Card className="shadow-lg">
             <CardHeader>
-              <CardTitle>Formulário de Denúncia e Análise</CardTitle>
+              <CardTitle>Formulário de Denúncia</CardTitle>
               <CardDescription>Preencha os detalhes com o máximo de informação possível.</CardDescription>
             </CardHeader>
             <CardContent>
@@ -224,38 +219,12 @@ export default function ReportingSection() {
 
                   <Button type="submit" className="w-full" disabled={isSubmitting}>
                     {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {isSubmitting ? 'Analisando e Salvando...' : 'Analisar e Enviar Denúncia'}
+                    {isSubmitting ? 'Salvando...' : 'Enviar Denúncia'}
                   </Button>
                 </form>
               </Form>
             </CardContent>
           </Card>
-
-          {isSubmitting && (
-            <div className="flex justify-center items-center flex-col gap-4 text-center">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <p className="text-muted-foreground">Analisando e salvando a denúncia... Isso pode levar um momento.</p>
-            </div>
-          )}
-
-          {analysisResult && (
-            <Card className="mt-8 animate-in fade-in-50 duration-500">
-              <CardHeader className="bg-accent/20">
-                <CardTitle>Resultado da Análise de IA</CardTitle>
-                <CardDescription>Com base na imagem e descrição fornecidas.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6 pt-6">
-                <div>
-                  <h3 className="font-semibold text-lg">Estimativa de Abuso/Negligência</h3>
-                  <p className="text-muted-foreground mt-1">{analysisResult.abuseEstimate}</p>
-                </div>
-                <div className="border-t pt-4">
-                  <h3 className="font-semibold text-lg">Recursos e Próximos Passos</h3>
-                  <p className="text-muted-foreground mt-1 whitespace-pre-wrap">{analysisResult.resources}</p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
         </div>
       </div>
     </section>

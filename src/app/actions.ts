@@ -2,10 +2,6 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import {
-  analyzeAnimalAbuseImage,
-  type AnalyzeAnimalAbuseImageOutput,
-} from "@/ai/flows/analyze-animal-abuse-image";
 import { initializeFirebase } from "@/firebase/index";
 import { collection, serverTimestamp } from "firebase/firestore";
 import { addDocumentNonBlocking } from "@/firebase/non-blocking-updates";
@@ -15,12 +11,12 @@ const ReportSchema = z.object({
   location: z.string().optional(),
   reporterName: z.string().optional(),
   reporterContact: z.string().optional(),
-  photoDataUri: z.string(),
+  photoDataUri: z.string(), // Mantemos para referência, mas não será analisado
 });
 
 type ReportInput = z.infer<typeof ReportSchema>;
 
-async function saveReportToFirestore(report: ReportInput, analysis: AnalyzeAnimalAbuseImageOutput) {
+async function saveReportToFirestore(report: ReportInput) {
   const { firestore } = initializeFirebase();
   const reportsCollection = collection(firestore, 'incident_reports');
 
@@ -30,20 +26,15 @@ async function saveReportToFirestore(report: ReportInput, analysis: AnalyzeAnima
     reporterName: report.reporterName || 'Anônimo',
     reporterContact: report.reporterContact || '',
     reportDate: serverTimestamp(),
-    mediaUrls: [], 
-    aiAnalysis: {
-      abuseEstimate: analysis.abuseEstimate,
-      resources: analysis.resources,
-    }
+    mediaUrls: [report.photoDataUri], // Salva a URI da imagem
   };
   
-  // Use non-blocking write
   addDocumentNonBlocking(reportsCollection, reportData);
 }
 
-export async function handleImageAnalysisAndSaveReport(
+export async function handleSaveReport(
   input: ReportInput
-): Promise<{ success: boolean; data?: AnalyzeAnimalAbuseImageOutput; error?: string }> {
+): Promise<{ success: boolean; error?: string }> {
   const parsedInput = ReportSchema.safeParse(input);
 
   if (!parsedInput.success) {
@@ -53,19 +44,12 @@ export async function handleImageAnalysisAndSaveReport(
   const reportData = parsedInput.data;
 
   try {
-    const analysisResult = await analyzeAnimalAbuseImage({
-      photoDataUri: reportData.photoDataUri,
-      description: reportData.description,
-    });
-
-    await saveReportToFirestore(reportData, analysisResult);
+    await saveReportToFirestore(reportData);
 
     revalidatePath("/reports");
-    return { success: true, data: analysisResult };
+    return { success: true };
   } catch (error) {
-    console.error("Image analysis or report saving failed:", error);
-    // This will now correctly return the analysis result even if firestore fails
-    // The user gets feedback, and the error is logged.
+    console.error("Report saving failed:", error);
     if (error instanceof Error) {
         return { success: false, error: error.message || "Falha ao processar a denúncia." };
     }
