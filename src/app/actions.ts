@@ -16,7 +16,7 @@ const ReportSchema = z.object({
   location: z.string().optional(),
   reporterName: z.string().optional(),
   reporterContact: z.string().optional(),
-  photoDataUri: z.string(),
+  photoDataUri: z.string().optional(),
 });
 
 type ReportInput = z.infer<typeof ReportSchema>;
@@ -28,9 +28,9 @@ async function saveReportToFirestore(report: ReportInput) {
     description: report.description,
     location: report.location || 'Local não informado',
     reporterName: report.reporterName || 'Anônimo',
-    reporterContact: report.reporterContact || '',
+    reporterContact: report.reporterContact || 'Não informado',
     reportDate: serverTimestamp(),
-    mediaUrls: [report.photoDataUri],
+    mediaUrls: report.photoDataUri ? [report.photoDataUri] : [],
   };
   
   await addDoc(reportsCollection, reportData);

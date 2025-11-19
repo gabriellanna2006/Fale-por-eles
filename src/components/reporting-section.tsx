@@ -61,61 +61,58 @@ export default function ReportingSection() {
   };
 
   const onSubmit = async (values: z.infer<typeof reportSchema>) => {
-    if (!imageFile) {
-      toast({
-        variant: 'destructive',
-        title: 'Foto obrigatória',
-        description: 'Por favor, anexe uma foto da situação.',
-      });
-      return;
-    }
-
     setIsSubmitting(true);
 
-    const reader = new FileReader();
-    reader.readAsDataURL(imageFile);
-    reader.onloadend = async () => {
-      const photoDataUri = reader.result as string;
-      
-      try {
-        const result = await handleSaveReport({
-          ...values,
-          photoDataUri,
-        });
+    const processAndSave = async (photoDataUri: string) => {
+        try {
+          const result = await handleSaveReport({
+            ...values,
+            photoDataUri,
+          });
 
-        if (result.success) {
-          toast({
-            title: 'Denúncia Enviada',
-            description: 'A sua denúncia foi enviada e salva com sucesso.',
+          if (result.success) {
+            toast({
+              title: 'Denúncia Enviada',
+              description: 'A sua denúncia foi enviada e salva com sucesso.',
+            });
+            form.reset();
+            setImageFile(null);
+            setImagePreview(null);
+          } else {
+            toast({
+              variant: 'destructive',
+              title: 'Erro no Envio',
+              description: result.error || 'Ocorreu um erro desconhecido.',
+            });
+          }
+        } catch (error) {
+           toast({
+              variant: 'destructive',
+              title: 'Erro no Envio',
+              description: 'Ocorreu um erro inesperado ao salvar a denúncia.',
           });
-          form.reset();
-          setImageFile(null);
-          setImagePreview(null);
-        } else {
-          toast({
-            variant: 'destructive',
-            title: 'Erro no Envio',
-            description: result.error || 'Ocorreu um erro desconhecido.',
-          });
+        } finally {
+          setIsSubmitting(false);
         }
-      } catch (error) {
-         toast({
-            variant: 'destructive',
-            title: 'Erro no Envio',
-            description: 'Ocorreu um erro inesperado ao salvar a denúncia.',
+    };
+    
+    if (imageFile) {
+      const reader = new FileReader();
+      reader.readAsDataURL(imageFile);
+      reader.onloadend = () => {
+        processAndSave(reader.result as string);
+      };
+      reader.onerror = () => {
+        toast({
+          variant: 'destructive',
+          title: 'Erro ao ler arquivo',
+          description: 'Não foi possível processar a imagem. Tente novamente.',
         });
-      } finally {
         setIsSubmitting(false);
-      }
-    };
-    reader.onerror = () => {
-      toast({
-        variant: 'destructive',
-        title: 'Erro ao ler arquivo',
-        description: 'Não foi possível processar a imagem. Tente novamente.',
-      });
-      setIsSubmitting(false);
-    };
+      };
+    } else {
+      processAndSave('');
+    }
   };
 
   return (
@@ -196,7 +193,7 @@ export default function ReportingSection() {
                     />
                   </div>
                   <FormItem>
-                    <FormLabel>Foto da Situação</FormLabel>
+                    <FormLabel>Foto da Situação (Opcional)</FormLabel>
                     <FormControl>
                       <div
                         className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-md cursor-pointer hover:border-primary transition-colors"
