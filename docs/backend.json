@@ -32,23 +32,10 @@
         "reporterContact": {
           "type": "string",
           "description": "Contact information of the person reporting the incident."
-        },
-        "aiAnalysis": {
-          "type": "object",
-          "description": "Analysis from the AI model.",
-          "properties": {
-            "abuseEstimate": {
-              "type": "string"
-            },
-            "resources": {
-              "type": "string"
-            }
-          }
         }
       },
       "required": [
         "description",
-        "location",
         "reportDate"
       ]
     },

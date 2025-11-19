@@ -26,7 +26,7 @@ async function saveReportToFirestore(report: ReportInput) {
 
   const reportData = {
     description: report.description,
-    location: report.location || '',
+    location: report.location || 'Local não informado',
     reporterName: report.reporterName || 'Anônimo',
     reporterContact: report.reporterContact || '',
     reportDate: serverTimestamp(),
