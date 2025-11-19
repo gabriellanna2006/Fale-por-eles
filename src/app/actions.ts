@@ -2,8 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { initializeFirebase } from "@/firebase/index";
-import { collection, serverTimestamp, addDoc } from "firebase/firestore";
+import { getApps, initializeApp } from "firebase/app";
+import { getFirestore, collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { firebaseConfig } from "@/firebase/config";
+
+// Inicialização correta do Firebase para Server Actions
+const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+const firestore = getFirestore(app);
+
 
 const ReportSchema = z.object({
   description: z.string(),
@@ -16,7 +22,6 @@ const ReportSchema = z.object({
 type ReportInput = z.infer<typeof ReportSchema>;
 
 async function saveReportToFirestore(report: ReportInput) {
-  const { firestore } = initializeFirebase();
   const reportsCollection = collection(firestore, 'incident_reports');
 
   const reportData = {
@@ -28,7 +33,6 @@ async function saveReportToFirestore(report: ReportInput) {
     mediaUrls: [report.photoDataUri],
   };
   
-  // Usando addDoc diretamente para garantir que a operação seja concluída.
   await addDoc(reportsCollection, reportData);
 }
 
