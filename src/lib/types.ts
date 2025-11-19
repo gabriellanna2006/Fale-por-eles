@@ -1,13 +1,11 @@
+import type { Timestamp } from 'firebase/firestore';
+
 export type IncidentReport = {
   id: string;
   description: string;
   location: string;
   mediaUrls: string[];
-  reportDate: any; // Using `any` for Firebase Timestamp flexibility
+  reportDate: Timestamp; // Using Timestamp for Firebase Timestamp flexibility
   reporterName: string;
   reporterContact: string;
-  aiAnalysis: {
-    abuseEstimate: string;
-    resources: string;
-  };
 };
