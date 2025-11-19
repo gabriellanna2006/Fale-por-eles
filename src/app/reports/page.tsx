@@ -1,8 +1,7 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemoFirebase, useCollection, useFirestore } from '@/firebase';
 import { collection, query, orderBy } from 'firebase/firestore';
-import { useCollection, useFirestore } from '@/firebase';
 import type { IncidentReport } from '@/lib/types';
 import Header from '@/components/layout/header';
 import Footer from '@/components/layout/footer';
@@ -16,7 +15,7 @@ import { ptBR } from 'date-fns/locale';
 export default function ReportsPage() {
   const firestore = useFirestore();
 
-  const reportsQuery = useMemo(() => {
+  const reportsQuery = useMemoFirebase(() => {
     if (!firestore) return null;
     return query(collection(firestore, 'incident_reports'), orderBy('reportDate', 'desc'));
   }, [firestore]);
