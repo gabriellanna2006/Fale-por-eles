@@ -11,8 +11,7 @@ import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/s
 const navLinks = [
   { href: '/#report', label: 'Denunciar' },
   { href: '/reports', label: 'Denúncias' },
-  { href: '/#map', label: 'Mapa' },
-  { href: '/#resources', label: 'Recursos' },
+  { href: '/#about', label: 'Sobre' },
   { href: '/#education', label: 'Educação' },
 ];
 
